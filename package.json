@@ -1,0 +1,26 @@
+{
+  "author": "FooStudio",
+  "name": "FooStudio-ubk_influencers",
+  "description": "FooStudio Unbreakable Influencers",
+  "version": "0.0.1",
+  "homepage": "",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/FooStudio/ubk_influencers.git"
+  },
+  "engines": {
+    "node": "~0.6.10"
+  },
+  "scripts": {
+    "start": "brunch watch --server"
+  },
+  "dependencies": {
+    "auto-reload-brunch": "^1.7.8",
+    "clean-css-brunch": ">= 1.0 < 1.4",
+    "css-brunch": ">= 1.0 < 1.4",
+    "font-awesome": "^4.6.1",
+    "javascript-brunch": ">= 1.0 < 1.4",
+    "sass-brunch": ">= 1.0 < 1.4",
+    "uglify-js-brunch": ">= 1.0 < 1.4"
+  }
+}
