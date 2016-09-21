@@ -1,14 +1,15 @@
-exports.files = {
-  javascripts: {joinTo: 'js/app.js'},
-  stylesheets: {joinTo: 'css/main.css'},
-  templates: {joinTo: 'app.js'},
-  plugins:{
-  	autoReload:{
-  		enabled:{
-  			js:true,
-  			css:true,
-  			assets:true
-  		}
-  	}
+module.exports = {
+  files: {
+    javascripts: {
+      joinTo: {
+        'js/vendor.js': /^(?!app)/,
+        'js/app.js': /^app/
+      }
+    },
+    stylesheets: {joinTo: 'css/app.css'}
+  },
+
+  plugins: {
+    babel: {presets: ['es2015']}
   }
 };
