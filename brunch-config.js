@@ -1,15 +1,11 @@
 module.exports = {
-  files: {
-    javascripts: {
-      joinTo: {
-        'js/vendor.js': /^(?!app)/,
-        'js/app.js': /^app/
-      }
-    },
+   files: {
+    javascripts: {joinTo: 'js/app.js'},
     stylesheets: {joinTo: 'css/app.css'}
   },
-
   plugins: {
-    babel: {presets: ['es2015']}
+    babel: {
+      presets: ['es2015']
+    }
   }
 };
