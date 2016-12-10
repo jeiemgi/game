@@ -1,0 +1,94 @@
+@mixin column($size){
+	width: ($size * 100%) / 12;
+}
+@mixin push($size){
+	margin-left: ($size * 100%) / 6;
+}
+
+.table-container{
+	position: absolute;
+	width: 100%;
+	height: 100%;
+}
+.table{
+	width: 100%;
+	height: 100%;
+	display: table;
+}
+.cell-center{
+	display: table-cell;
+	vertical-align: middle;
+	width: 100%;
+}
+
+.text-left		{ text-align: left;   }
+.text-center	{ text-align: center; }
+.text-right		{ text-align: right;  }
+
+
+main 		{ margin: 0 auto;    }
+.main-1280	{ max-width: 1280px; }
+.main-960 	{ max-width: 960px;  }
+
+.col{
+	min-height: 100px;
+	display: inline-block;	
+	
+	&.col-1{
+		@include column(1);
+	}
+	&.col-2{
+		@include column(2);
+	}
+	&.col-3{
+		@include column(3);
+	}
+	&.col-4{
+		@include column(4);
+	}
+	&.col-5{
+		@include column(5);
+	}
+	&.col-6{
+		@include column(6);
+	}
+	&.both{
+		clear: both;
+	}
+}
+.push{
+	&.push-1{
+		@include push(1);
+	}
+	&.push-2{
+		@include push(2);
+	}
+	&.push-3{
+		@include push(3);
+	}
+	&.push-4{
+		@include push(4);
+	}
+	&.push-5{
+		@include push(5);
+	}
+	&.push-6{
+		@include push(6);
+	}
+}
+@media screen and (max-width: 960px){
+	.col{
+		&.col-1,
+		&.col-2{ @include column(3); }
+		&.col-4,
+		&.col-5{ @include column(6); }
+	}
+	.push{
+		&.push-1,
+		&.push-2,
+		&.push-3,
+		&.push-4,
+		&.push-5,
+		&.push-6{ @include push(0); }
+	}
+}

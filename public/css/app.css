@@ -419,3 +419,98 @@ textarea {
   -webkit-appearance: button; /* 1 */
   font: inherit; /* 2 */
 }
+.table-container {
+  position: absolute;
+  width: 100%;
+  height: 100%; }
+
+.table {
+  width: 100%;
+  height: 100%;
+  display: table; }
+
+.cell-center {
+  display: table-cell;
+  vertical-align: middle;
+  width: 100%; }
+
+.text-left {
+  text-align: left; }
+
+.text-center {
+  text-align: center; }
+
+.text-right {
+  text-align: right; }
+
+main {
+  margin: 0 auto; }
+
+.main-1280 {
+  max-width: 1280px; }
+
+.main-960 {
+  max-width: 960px; }
+
+.col {
+  min-height: 100px;
+  display: inline-block; }
+  .col.col-1 {
+    width: 8.33333%; }
+  .col.col-2 {
+    width: 16.66667%; }
+  .col.col-3 {
+    width: 25%; }
+  .col.col-4 {
+    width: 33.33333%; }
+  .col.col-5 {
+    width: 41.66667%; }
+  .col.col-6 {
+    width: 50%; }
+  .col.both {
+    clear: both; }
+
+.push.push-1 {
+  margin-left: 16.66667%; }
+
+.push.push-2 {
+  margin-left: 33.33333%; }
+
+.push.push-3 {
+  margin-left: 50%; }
+
+.push.push-4 {
+  margin-left: 66.66667%; }
+
+.push.push-5 {
+  margin-left: 83.33333%; }
+
+.push.push-6 {
+  margin-left: 100%; }
+
+@media screen and (max-width: 960px) {
+  .col.col-1, .col.col-2 {
+    width: 25%; }
+  .col.col-4, .col.col-5 {
+    width: 50%; }
+  .push.push-1, .push.push-2, .push.push-3, .push.push-4, .push.push-5, .push.push-6 {
+    margin-left: 0%; } }
+
+canvas {
+  /* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#87e0fd+0,53cbf1+62,05abe0+100 */
+  background: #87e0fd;
+  /* Old browsers */
+  background: -moz-linear-gradient(top, #87e0fd 0%, #53cbf1 62%, #05abe0 100%);
+  /* FF3.6-15 */
+  background: -webkit-linear-gradient(top, #87e0fd 0%, #53cbf1 62%, #05abe0 100%);
+  /* Chrome10-25,Safari5.1-6 */
+  background: linear-gradient(to bottom, #87e0fd 0%, #53cbf1 62%, #05abe0 100%);
+  /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#87e0fd', endColorstr='#05abe0',GradientType=0 );
+  /* IE6-9 */
+  width: 100%;
+  height: 100%;
+  position: absolute; }
+
+
+/*# sourceMappingURL=app.css.map*/
