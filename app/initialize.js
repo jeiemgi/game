@@ -1,19 +1,12 @@
 var domready = require("domready");
+var stage = require("js/modules/world.js");
 
-loadCharacter = function(){
-	var personaje = require("js/modules/personaje");
-}
+var Game = {
+    start: function() {
+        stage.init();
+    }
+};
 
-moveCharacter = function(){
-	var movements = require("js/modules/movements.js");
-	movements.events();
-}
-startGame = function(){
-	loadCharacter();
-	moveCharacter();
-}
-
-domready(function(){
-	startGame();
+domready(function() {
+    Game.start();
 });
-
