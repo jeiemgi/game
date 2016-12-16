@@ -4,8 +4,6 @@ module.exports = {
     stylesheets: {joinTo: 'css/app.css'}
   },
   plugins: {
-    babel: {
-      presets: ['es2015', 'stage-0']
-    }
+    babel: {presets: ['es2015', 'stage-0']}
   }
 };

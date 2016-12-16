@@ -224,13 +224,39 @@ exports.default = Game;
 ;
 
 domready(function () {
-    var g = new Game();
-    g.start();
+    var game = new Game();
+    game.start();
 });
 });
 
-require.register("js/modules/Bullet.js", function(exports, require, module) {
+require.register("js/modules/BgController.js", function(exports, require, module) {
+// export default class BgController {
+//     constructor(ctx) {
+//         this.ctx = ctx;
+//         this.img = new Image();
+//         this.bgW = 5512;
+//         this.bgH = 800;
+//         this.canvasX = 0;
+//     };
+
+//     render() {
+//         this.draw();
+//         this.canvasX += 10;
+//     };
+
+//     draw(){
+//         this.ctx.drawImage(this.img, this.canvasX, 0, this.bgW, this.bgH);
+//         this.img.onload = () => {
+//             this.ctx.drawImage(this.img, this.canvasX, 0, this.bgW, this.bgH);
+//         }
+//         this.img.src = "../img/bg.png";
+//     };
+// }
 "use strict";
+});
+
+;require.register("js/modules/Bullet.js", function(exports, require, module) {
+'use strict';
 
 Object.defineProperty(exports, "__esModule", {
     value: true
@@ -238,7 +264,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _World = require("js/modules/World");
+var _World = require('js/modules/World');
 
 var _World2 = _interopRequireDefault(_World);
 
@@ -247,25 +273,32 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var Bullet = function () {
-    function Bullet(controller, x, y) {
+    function Bullet(controller, x, y, charPosX) {
         _classCallCheck(this, Bullet);
 
         this.x = x;
         this.y = y;
+        this.charPosX = charPosX;
         this.controller = controller;
+        this.punch = new Audio('../sounds/punch.mp3');
     }
 
     _createClass(Bullet, [{
-        key: "render",
+        key: 'collide',
+        value: function collide() {
+            this.punch.play();
+        }
+    }, {
+        key: 'render',
         value: function render(ctx) {
             this.draw(ctx, this.x, this.y);
-            this.x += 10;
-            if (this.x > 960) {
+            this.x += 5;
+            if (this.x > this.charPosX + 700) {
                 this.controller.remove(this);
             }
         }
     }, {
-        key: "draw",
+        key: 'draw',
         value: function draw(ctx, x, y) {
             ctx.beginPath();
             ctx.arc(x, y, 5, 0, 2 * Math.PI);
@@ -299,22 +332,27 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var BulletController = function () {
-    function BulletController() {
+    function BulletController(enemyController) {
         _classCallCheck(this, BulletController);
 
         this.bullets = [];
         this.maxBullets = 10;
+
+        this.enemyController = enemyController;
+        this.x = 0;
+        this.y = 0;
     }
 
     _createClass(BulletController, [{
         key: "add",
-        value: function add(x, y) {
+        value: function add(x, y, charPos) {
             if (this.bullets.length >= this.maxBullets) return;
-            this.bullets.push(new _Bullet2.default(this, x, y));
+            this.bullets.push(new _Bullet2.default(this, x, y, charPos));
         }
     }, {
         key: "render",
         value: function render(ctx) {
+            var i = 0;
             var _iteratorNormalCompletion = true;
             var _didIteratorError = false;
             var _iteratorError = undefined;
@@ -323,7 +361,14 @@ var BulletController = function () {
                 for (var _iterator = this.bullets[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
                     var bullet = _step.value;
 
-                    bullet.render(ctx);
+                    if (this.collision(bullet, i)) {
+                        bullet.collide();
+                        this.remove(bullet);
+                        this.enemyController.remove(this.enemyController.enemies[i]);
+                    } else {
+                        bullet.render(ctx);
+                    }
+                    i += 1;
                 }
             } catch (err) {
                 _didIteratorError = true;
@@ -342,7 +387,14 @@ var BulletController = function () {
         }
     }, {
         key: "collision",
-        value: function collision(object) {}
+        value: function collision(bullet, i) {
+            if (bullet && this.enemyController.enemies[i]) {
+                if (bullet.y < this.enemyController.enemies[i].y) return false;
+                if (bullet.x >= this.enemyController.enemies[i].x || bullet.x <= this.enemyController.enemies[i].enemyW) {
+                    return true;
+                }
+            } else return false;
+        }
     }, {
         key: "remove",
         value: function remove(bullet) {
@@ -360,7 +412,7 @@ exports.default = BulletController;
 });
 
 ;require.register("js/modules/Camera.js", function(exports, require, module) {
-'use strict';
+"use strict";
 
 Object.defineProperty(exports, "__esModule", {
 	value: true
@@ -371,21 +423,16 @@ var _createClass = function () { function defineProperties(target, props) { for 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var Camera = function () {
-	function Camera() {
+	function Camera(character) {
 		_classCallCheck(this, Camera);
 
-		this.follow = false;
-		this.viewPort = {
-			width: 960,
-			height: 800
-		};
-		this.CamPosX = 0;
+		this.character = character;
 	}
 
 	_createClass(Camera, [{
-		key: 'followChar',
-		value: function followChar() {
-			console.log('test');
+		key: "follow",
+		value: function follow(direction) {
+			if (direction === "right") this.character.ctx.translate(-80, 0);else this.character.ctx.translate(80, 0);
 		}
 	}]);
 
@@ -395,7 +442,325 @@ var Camera = function () {
 exports.default = Camera;
 });
 
-;require.register("js/modules/Player.js", function(exports, require, module) {
+;require.register("js/modules/Enemy.js", function(exports, require, module) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var EmenyA = function () {
+    function EmenyA(controller, x, y, type) {
+        _classCallCheck(this, EmenyA);
+
+        this.x = x;
+        this.y = y;
+        this.type = type;
+        this.enemyW = 140;
+        this.enemyH = 220;
+        this.frames = 0;
+        this.direction = "up";
+        this.img = new Image();
+        if (this.type == 2) {
+            this.imgSrc = "../img/zombie-2.png";
+        } else {
+            this.imgSrc = "../img/zombie.png";
+        }
+        this.img.src = this.imgSrc;
+    }
+
+    _createClass(EmenyA, [{
+        key: "render",
+        value: function render(ctx) {
+            this.draw(ctx, this.x, this.y);
+            if (this.type == 1) {
+                this.x -= 1;
+            } else {
+                this.moveY();
+            }
+            if (this.x > this.charPosX + 700) {
+                this.controller.remove(this);
+            }
+        }
+    }, {
+        key: "moveY",
+        value: function moveY() {
+            if (this.frames < 20 && this.direction == "up") {
+                this.y += 10;
+                this.frames++;
+                if (this.frames == 20) {
+                    this.direction = "down";
+                }
+            } else if (this.frames <= 50 && this.direction == "down") {
+                this.y -= 10;
+                this.frames--;
+                if (this.frames == -20) {
+                    this.direction = "up";
+                }
+            }
+        }
+    }, {
+        key: "moveFw",
+        value: function moveFw() {
+            this.x += 80;
+        }
+    }, {
+        key: "draw",
+        value: function draw(ctx, x, y) {
+            ctx.drawImage(this.img, x, y, this.enemyW, this.enemyH);
+        }
+    }]);
+
+    return EmenyA;
+}();
+
+exports.default = EmenyA;
+;
+});
+
+require.register("js/modules/EnemyController.js", function(exports, require, module) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _Enemy = require("js/modules/Enemy");
+
+var _Enemy2 = _interopRequireDefault(_Enemy);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var EnemyController = function () {
+    function EnemyController() {
+        _classCallCheck(this, EnemyController);
+
+        this.enemies = [];
+    }
+
+    _createClass(EnemyController, [{
+        key: "render",
+        value: function render(ctx) {
+            var _iteratorNormalCompletion = true;
+            var _didIteratorError = false;
+            var _iteratorError = undefined;
+
+            try {
+                for (var _iterator = this.enemies[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+                    var enemy = _step.value;
+
+                    enemy.render(ctx);
+                }
+            } catch (err) {
+                _didIteratorError = true;
+                _iteratorError = err;
+            } finally {
+                try {
+                    if (!_iteratorNormalCompletion && _iterator.return) {
+                        _iterator.return();
+                    }
+                } finally {
+                    if (_didIteratorError) {
+                        throw _iteratorError;
+                    }
+                }
+            }
+        }
+    }, {
+        key: "add",
+        value: function add(x, y, type) {
+            this.enemies.push(new _Enemy2.default(this, x, y, type));
+        }
+    }, {
+        key: "remove",
+        value: function remove(enemy) {
+            var index = this.enemies.indexOf(enemy);
+            if (index > -1) {
+                this.enemies.splice(index, 1);
+            }
+        }
+    }, {
+        key: "draw",
+        value: function draw() {
+            this.ctx.drawImage(this.img, this.EposX, this.EposY, this.enemyW, this.enemyH);
+            this.img.src = this.imgSrc;
+        }
+    }]);
+
+    return EnemyController;
+}();
+
+exports.default = EnemyController;
+;
+});
+
+require.register("js/modules/Obstacle.js", function(exports, require, module) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Obstacle = function () {
+    function Obstacle(controller, x, y, type) {
+        _classCallCheck(this, Obstacle);
+
+        this.x = x;
+        this.y = y;
+        this.type = type;
+        this.obstacleW = 300;
+        this.obstacleH = 220;
+        this.frames = 0;
+        this.controller = controller;
+        this.direction = "up";
+        this.img = new Image();
+        if (this.type == "2") {
+            this.imgSrc = "img/rock.png";
+        } else {
+            this.imgSrc = "img/table.png";
+        }
+        this.img.src = this.imgSrc;
+    }
+
+    _createClass(Obstacle, [{
+        key: "render",
+        value: function render(ctx) {
+            this.draw(ctx, this.x, this.y);
+
+            if (this.type == 1) {
+                // this.x -= 1;
+            } else {
+                    // this.moveY();
+                }
+            if (this.x > this.charPosX + 700) {
+                this.controller.remove(this);
+            }
+        }
+    }, {
+        key: "draw",
+        value: function draw(ctx, x, y) {
+            ctx.drawImage(this.img, x, y, this.obstacleW, this.obstacleH);
+        }
+    }, {
+        key: "moveY",
+        value: function moveY() {
+            if (this.frames < 50 && this.direction == "up") {
+                this.y += 10;
+                this.frames++;
+                if (this.frames == 50) {
+                    this.direction = "down";
+                }
+            } else if (this.frames <= 50 && this.direction == "down") {
+                this.y -= 10;
+                this.frames--;
+                if (this.frames == 0) {
+                    this.direction = "up";
+                }
+            }
+        }
+    }]);
+
+    return Obstacle;
+}();
+
+exports.default = Obstacle;
+;
+});
+
+require.register("js/modules/ObstacleController.js", function(exports, require, module) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _Obstacle = require("js/modules/Obstacle");
+
+var _Obstacle2 = _interopRequireDefault(_Obstacle);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var ObstacleController = function () {
+    function ObstacleController() {
+        _classCallCheck(this, ObstacleController);
+
+        this.obstacles = [];
+    }
+
+    _createClass(ObstacleController, [{
+        key: "render",
+        value: function render(ctx) {
+            var _iteratorNormalCompletion = true;
+            var _didIteratorError = false;
+            var _iteratorError = undefined;
+
+            try {
+                for (var _iterator = this.obstacles[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+                    var obstacle = _step.value;
+
+                    obstacle.render(ctx);
+                }
+            } catch (err) {
+                _didIteratorError = true;
+                _iteratorError = err;
+            } finally {
+                try {
+                    if (!_iteratorNormalCompletion && _iterator.return) {
+                        _iterator.return();
+                    }
+                } finally {
+                    if (_didIteratorError) {
+                        throw _iteratorError;
+                    }
+                }
+            }
+        }
+    }, {
+        key: "add",
+        value: function add(x, y, type) {
+            this.obstacles.push(new _Obstacle2.default(this, x, y, type));
+        }
+    }, {
+        key: "remove",
+        value: function remove(obstacle) {
+            console.log(obstacle);
+            var index = this.obstacles.indexOf(obstacle);
+            if (index > -1) {
+                this.obstacles.splice(index, 1);
+            }
+        }
+    }, {
+        key: "draw",
+        value: function draw() {
+            this.ctx.drawImage(this.img, this.EposX, this.EposY, this.enemyW, this.enemyH);
+            this.img.src = this.imgSrc;
+        }
+    }]);
+
+    return ObstacleController;
+}();
+
+exports.default = ObstacleController;
+;
+});
+
+require.register("js/modules/Player.js", function(exports, require, module) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -408,12 +773,16 @@ var _Bullet = require("js/modules/Bullet");
 
 var _Bullet2 = _interopRequireDefault(_Bullet);
 
+var _Camera = require("js/modules/Camera");
+
+var _Camera2 = _interopRequireDefault(_Camera);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var Player = function () {
-    function Player(bulletController) {
+    function Player(bulletController, enemyController, ctx) {
         var _this = this;
 
         _classCallCheck(this, Player);
@@ -423,25 +792,26 @@ var Player = function () {
             switch (keyCode) {
                 case 32:
                     /* Space Bar */
-                    _this.bulletController.add(_this.posX + 155, _this.posY + 126);
+                    if (_this.canShoot) _this.bulletController.add(_this.posX + 155, _this.posY + 126, _this.posX, _this.enemies);else return;
                     break;
                 case 37:
                     /* Arrow Left */
-                    if (_this.posX == 0) return;
-                    _this.moveFw();
+                    if (_this.posX == 0 || _this.posX <= 320) return;
+                    if (_this.posX >= 320) _this.cam.follow("left");
+                    _this.moveBack();
                     break;
                 case 38:
                     /* Arrow Up */
-                    if (_this.posY == 340) return;
-                    _this.jump();
+                    if (_this.posY == 270) _this.posY = 420;else _this.jump();
                     break;
                 case 39:
                     /* Arrow Right */
-                    if (_this.posX == 800) return;
-                    if (_this.posX >= 320) {
-                        console.log("follow");
+                    if (_this.posX == 4960) {
+                        alert("¡Ganaste!");
+                        return;
                     }
-                    _this.moveBack();
+                    if (_this.posX >= 320) _this.cam.follow("right");
+                    _this.moveFw();
                     break;
             }
         };
@@ -454,60 +824,95 @@ var Player = function () {
         };
 
         this.bulletController = bulletController;
-        this.posX = 0;
+        this.enemyController = enemyController;
+        this.ctx = ctx;
+        this.isDead = false;
+        this.canShoot = true;
+        this.posX = 320;
         this.posY = 420;
         this.charW = 160;
         this.charH = 200;
-        this.ctx = null;
+        this.imgSrc = "../img/hero.png";
+        this.cam = new _Camera2.default(this);
         this.img = new Image();
     }
 
     _createClass(Player, [{
         key: "init",
         value: function init() {
-            this.actions();
+            this.controls();
         }
     }, {
         key: "render",
-        value: function render(ctx, x) {
-            this.ctx = ctx;
+        value: function render() {
+            var i = 0;
+            var _iteratorNormalCompletion = true;
+            var _didIteratorError = false;
+            var _iteratorError = undefined;
+
+            try {
+                for (var _iterator = this.enemyController.enemies[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+                    var zombie = _step.value;
+
+                    if (this.attackedBy(zombie, i)) return;
+                }
+            } catch (err) {
+                _didIteratorError = true;
+                _iteratorError = err;
+            } finally {
+                try {
+                    if (!_iteratorNormalCompletion && _iterator.return) {
+                        _iterator.return();
+                    }
+                } finally {
+                    if (_didIteratorError) {
+                        throw _iteratorError;
+                    }
+                }
+            }
+
             this.draw();
         }
     }, {
-        key: "renderMove",
-        value: function renderMove() {
-            this.draw();
-            this.posX += 1;
+        key: "attackedBy",
+        value: function attackedBy(zombie, i) {
+            if (zombie && this.enemyController.enemies) {
+                if (zombie.x <= this.posX + 10) {
+                    this.isDead = true;
+                    return true;
+                } else return false;
+            }
         }
     }, {
-        key: "actions",
-        value: function actions() {
+        key: "controls",
+        value: function controls() {
             window.addEventListener("keydown", this.onKeyDown);
             window.addEventListener("keyup", this.onKeyUp);
         }
     }, {
         key: "jump",
-        value: function jump() {
-            // this.draw(this.posY -= 80);
-        }
-    }, {
-        key: "moveFw",
-        value: function moveFw() {
-            this.draw();
-            this.posX -= 10;
+        value: function jump(time) {
+            this.posY -= 150;
         }
     }, {
         key: "moveBack",
         value: function moveBack() {
-            for (var i = 0; i < 80; i++) {
-                this.renderMove(this.ctx);
-            }
+            this.imgSrc = "../img/hero-flipped.png";
+            this.canShoot = false;
+            this.posX -= 80;
+        }
+    }, {
+        key: "moveFw",
+        value: function moveFw() {
+            this.imgSrc = "../img/hero.png";
+            this.canShoot = true;
+            this.posX += 80;
         }
     }, {
         key: "draw",
-        value: function draw(x) {
+        value: function draw() {
             this.ctx.drawImage(this.img, this.posX, this.posY, this.charW, this.charH);
-            this.img.src = "../img/hero.png";
+            this.img.src = this.imgSrc;
         }
     }]);
 
@@ -535,6 +940,14 @@ var _BulletController = require("js/modules/BulletController");
 
 var _BulletController2 = _interopRequireDefault(_BulletController);
 
+var _EnemyController = require("js/modules/EnemyController");
+
+var _EnemyController2 = _interopRequireDefault(_EnemyController);
+
+var _ObstacleController = require("js/modules/ObstacleController");
+
+var _ObstacleController2 = _interopRequireDefault(_ObstacleController);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -544,18 +957,34 @@ var World = function () {
         _classCallCheck(this, World);
 
         this.myCanvas = document.getElementById('myCanvas');
+        this.ambient = new Audio('../sounds/ambient.mp3');
+        this.ctx = this.myCanvas.getContext("2d");
         this.canW = myCanvas.width;
         this.canH = myCanvas.width;
-        this.ctx = this.myCanvas.getContext("2d");
-        this.bulletController = new _BulletController2.default();
-        this.p1 = new _Player2.default(this.bulletController);
+        this.enemyController = new _EnemyController2.default();
+        this.obstacleController = new _ObstacleController2.default();
+        this.bulletController = new _BulletController2.default(this.enemyController, this.obstacleController);
+        this.p1 = new _Player2.default(this.bulletController, this.enemyController, this.ctx);
         this.bg = new Image();
     }
 
     _createClass(World, [{
         key: "init",
         value: function init() {
+            this.ambient.play();
             this.p1.init(); // Inicializa el jugador 1
+
+            this.enemyController.add(1500, 410, 1);
+            this.enemyController.add(1650, 450, 1);
+            this.enemyController.add(1900, 420, 1);
+
+            this.enemyController.add(2600, 440, 2);
+            this.enemyController.add(2950, 470, 2);
+            this.enemyController.add(3200, 420, 2);
+
+            this.obstacleController.add(4000, 420, 1);
+            this.obstacleController.add(4300, 420, 2);
+
             this.render(); // Renderiza el Mundo
         }
     }, {
@@ -567,11 +996,18 @@ var World = function () {
     }, {
         key: "render",
         value: function render() {
-            requestAnimationFrame(this.render.bind(this));
-            this.ctx.clearRect(0, 0, this.canW, this.canH);
-            this.setBg();
-            this.p1.render(this.ctx);
-            this.bulletController.render(this.ctx);
+            if (this.p1.isDead != true) {
+                requestAnimationFrame(this.render.bind(this));
+                this.ctx.clearRect(0, 0, this.canW, this.canH);
+                this.setBg();
+
+                this.p1.render(); /* Personaje */
+                this.bulletController.render(this.ctx); /*   Balas   */
+                this.enemyController.render(this.ctx); /* Enemigos */
+                this.obstacleController.render(this.ctx); /* Obstaculo */
+            } else {
+                alert("Perdiste ahora eres un Zombie");
+            }
         }
     }]);
 

@@ -9,6 +9,7 @@
 
 //     render() {
 //         this.draw();
+//         this.canvasX += 10;
 //     };
 
 //     draw(){

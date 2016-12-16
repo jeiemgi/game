@@ -1,14 +1,12 @@
 export default class Camera{
-	constructor() {
-		this.follow = false;
-		this.viewPort = {
-			width : 960,
-			height: 800
-		}
-		this.CamPosX = 0;
+	constructor(character) {
+		this.character = character;
 	}
-	followChar(){
-		console.log('test');
+	follow(direction){
+		if(direction === "right")
+			this.character.ctx.translate(-80,0);
+		else
+			this.character.ctx.translate(80,0);
 	}
-
 }
+

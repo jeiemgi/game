@@ -1,75 +1,95 @@
 import Bullet from "js/modules/Bullet"
+import Camera from "js/modules/Camera"
 
 export default class Player {
-    constructor(bulletController) {
+    constructor(bulletController, enemyController, ctx) {
         this.bulletController = bulletController;
-        this.posX = 0;
+        this.enemyController = enemyController;
+        this.ctx = ctx;
+        this.isDead = false;
+        this.canShoot = true;
+        this.posX = 320;
         this.posY = 420;
         this.charW = 160;
         this.charH = 200;
-        this.ctx = null;
+        this.imgSrc = "../img/hero.png";
+        this.cam = new Camera(this);
         this.img = new Image();
     };
-
     init() {
-        this.actions();
+        this.controls();
     };
-    render(ctx, x) {
-        this.ctx = ctx;
-        this.draw()
+    render() {
+        let i = 0;
+        for (let zombie of this.enemyController.enemies) {
+            if (this.attackedBy(zombie, i))
+                return;
+        }
+        this.draw();
     }
-    renderMove() {
-        this.draw()
-        this.posX += 1;
+    attackedBy(zombie, i) {
+        if (zombie && this.enemyController.enemies) {
+            if (zombie.x <= this.posX  + 10) {
+                this.isDead = true;
+                return true;
+            } else return false;
+        }
     }
-    actions() {
+    controls() {
         window.addEventListener("keydown", this.onKeyDown);
         window.addEventListener("keyup", this.onKeyUp);
     }
-    jump() {
-        // this.draw(this.posY -= 80);
-    };
-    moveFw() {
-        this.draw();
-        this.posX -= 10;
+    jump(time) {
+        this.posY -= 150;
     };
     moveBack() {
-        for (var i = 0; i < 80; i++) {
-            this.renderMove(this.ctx)
-        }
+        this.imgSrc = "../img/hero-flipped.png"
+        this.canShoot = false;
+        this.posX -= 80;
     };
-    draw(x) {
+    moveFw() {
+        this.imgSrc = "../img/hero.png"
+        this.canShoot = true;
+        this.posX += 80;
+    };
+    draw() {
         this.ctx.drawImage(this.img, this.posX, this.posY, this.charW, this.charH);
-        this.img.src = "../img/hero.png";
-
+        this.img.src = this.imgSrc;
     };
     onKeyDown = (e) => {
         let keyCode = e.keyCode;
         switch (keyCode) {
             case 32:
                 /* Space Bar */
-                this.bulletController.add(this.posX + 155, this.posY + 126)
+                if (this.canShoot)
+                    this.bulletController.add(this.posX + 155, this.posY + 126, this.posX, this.enemies)
+                else
+                    return
                 break;
             case 37:
                 /* Arrow Left */
-                if (this.posX == 0)
+                if (this.posX == 0 || this.posX <= 320)
                     return;
-                this.moveFw();
+                if (this.posX >= 320)
+                    this.cam.follow("left");
+                this.moveBack();
                 break;
             case 38:
                 /* Arrow Up */
-                if (this.posY == 340)
-                    return;
-                this.jump();
+                if (this.posY == 270)
+                    this.posY = 420;
+                else
+                    this.jump();
                 break;
             case 39:
                 /* Arrow Right */
-                if (this.posX == 800)
+                if (this.posX == 4960){
+                    alert("¡Ganaste!")
                     return;
-                if (this.posX >= 320) {
-                    console.log("follow");
                 }
-                this.moveBack();
+                if (this.posX >= 320)
+                    this.cam.follow("right");
+                this.moveFw();
                 break;
         }
     }

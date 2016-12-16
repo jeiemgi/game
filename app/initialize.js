@@ -1,5 +1,4 @@
 var domready = require("domready");
-
 import World from "js/modules/World";
 
 export default class Game{
@@ -12,6 +11,6 @@ export default class Game{
 };
 
 domready(function() {
-    let g = new Game();
-    g.start();
+    let game = new Game();
+    game.start();
 });
