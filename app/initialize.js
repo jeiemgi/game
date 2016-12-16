@@ -1,12 +1,17 @@
 var domready = require("domready");
-var stage = require("js/modules/world.js");
 
-var Game = {
-    start: function() {
-        stage.init();
+import World from "js/modules/World";
+
+export default class Game{
+    constructor() {
+        this.s1 = new World();
+    }
+    start() {
+        this.s1.init();
     }
 };
 
 domready(function() {
-    Game.start();
+    let g = new Game();
+    g.start();
 });

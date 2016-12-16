@@ -16,14 +16,17 @@
     "build": "brunch build --production"
   },
   "devDependencies": {
-    "domready": "^1.0.8",
+    "babel": "^6.5.2",
+    "babel-brunch": "^6.0.6",
     "clean-css-brunch": "^2.0.0",
     "css-brunch": "^2.6.1",
+    "domready": "^1.0.8",
     "javascript-brunch": "^2.0.0",
     "sass-brunch": "^2.6.3",
     "uglify-js-brunch": "^2.0.1"
   },
   "dependencies": {
-    "auto-reload-brunch": "^2.7.1"
+    "auto-reload-brunch": "^2.7.1",
+    "babel-preset-stage-0": "^6.16.0"
   }
 }
