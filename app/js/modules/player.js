@@ -7,6 +7,7 @@ export default class Player {
         this.enemyController = enemyController;
         this.ctx = ctx;
         this.isDead = false;
+        this.canMove = true;
         this.canShoot = true;
         this.posX = 320;
         this.posY = 420;
@@ -29,7 +30,7 @@ export default class Player {
     }
     attackedBy(zombie, i) {
         if (zombie && this.enemyController.enemies) {
-            if (zombie.x <= this.posX  + 10) {
+            if (zombie.x <= this.posX + 10) {
                 this.isDead = true;
                 return true;
             } else return false;
@@ -48,9 +49,21 @@ export default class Player {
         this.posX -= 80;
     };
     moveFw() {
-        this.imgSrc = "../img/hero.png"
-        this.canShoot = true;
-        this.posX += 80;
+        // console.log(this.posX);
+        // console.log(this.obstacleController.obstacles[0].x);
+        // for (var i = 0; this.obstacleController.obstacles; i++) {
+        //     if (((this.obstacleController.obstacles[i].x + 300) - (this.posX)) <= 100 ){
+        //         this.canMove = false;
+        //     }else{
+        //         this.canMove = true;
+        //     }
+        // }
+        if (this.canMove) {
+            this.cam.follow("right");
+            this.imgSrc = "../img/hero.png"
+            this.canShoot = true;
+            this.posX += 80;
+        }
     };
     draw() {
         this.ctx.drawImage(this.img, this.posX, this.posY, this.charW, this.charH);
@@ -83,13 +96,12 @@ export default class Player {
                 break;
             case 39:
                 /* Arrow Right */
-                if (this.posX == 4960){
+                if (this.posX == 4960) {
                     alert("¡Ganaste!")
                     return;
                 }
                 if (this.posX >= 320)
-                    this.cam.follow("right");
-                this.moveFw();
+                    this.moveFw();
                 break;
         }
     }

@@ -18,12 +18,6 @@ export default class Obstacle {
     };
     render(ctx) {
         this.draw(ctx, this.x, this.y);
-
-        if (this.type == 1) {
-            // this.x -= 1;
-        } else {
-            // this.moveY();
-        }
         if (this.x > this.charPosX + 700) {
             this.controller.remove(this);
         }

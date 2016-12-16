@@ -12,5 +12,7 @@ export default class Game{
 
 domready(function() {
     let game = new Game();
+    $("#battle").on("click", function(){
     game.start();
+    })
 });

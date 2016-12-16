@@ -4,8 +4,9 @@ export default class BulletController {
     bullets = [];
     maxBullets = 10;
 
-    constructor(enemyController) {
+    constructor(enemyController, obstacleController) {
         this.enemyController = enemyController;
+        this.obstacleController = obstacleController;
         this.x = 0;
         this.y = 0;
     }
@@ -20,13 +21,17 @@ export default class BulletController {
                 bullet.collide();
                 this.remove(bullet);
                 this.enemyController.remove(this.enemyController.enemies[i]);
+            } else if (this.collisionO(bullet, i)) {
+                bullet.collide(bullet, i);
+                this.remove(bullet);
+                this.obstacleController.remove(this.obstacleController.obstacles[i]);
             } else {
                 bullet.render(ctx);
             }
             i += 1;
         }
-    }
 
+    }
     collision(bullet, i) {
         if (bullet && this.enemyController.enemies[i]) {
             if (bullet.y < this.enemyController.enemies[i].y) return false;
@@ -35,6 +40,16 @@ export default class BulletController {
                 return true;
             }
         } else return false;
+    }
+    collisionO(bullet, i) {
+        console.log('test');
+        if (bullet && this.obstacleController.obstacles[i]) {
+            if (bullet.y < this.obstacleController.obstacles[i].y) return false;
+            if (bullet.x >= this.obstacleController.obstacles[i].x ||
+                bullet.x <= this.obstacleController.obstacles[i].obstacleW) {
+                return true;
+            }
+        }
     }
 
     remove(bullet) {

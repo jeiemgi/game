@@ -225,7 +225,9 @@ exports.default = Game;
 
 domready(function () {
     var game = new Game();
-    game.start();
+    $("#battle").on("click", function () {
+        game.start();
+    });
 });
 });
 
@@ -332,13 +334,14 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var BulletController = function () {
-    function BulletController(enemyController) {
+    function BulletController(enemyController, obstacleController) {
         _classCallCheck(this, BulletController);
 
         this.bullets = [];
         this.maxBullets = 10;
 
         this.enemyController = enemyController;
+        this.obstacleController = obstacleController;
         this.x = 0;
         this.y = 0;
     }
@@ -365,6 +368,10 @@ var BulletController = function () {
                         bullet.collide();
                         this.remove(bullet);
                         this.enemyController.remove(this.enemyController.enemies[i]);
+                    } else if (this.collisionO(bullet, i)) {
+                        bullet.collide(bullet, i);
+                        this.remove(bullet);
+                        this.obstacleController.remove(this.obstacleController.obstacles[i]);
                     } else {
                         bullet.render(ctx);
                     }
@@ -394,6 +401,17 @@ var BulletController = function () {
                     return true;
                 }
             } else return false;
+        }
+    }, {
+        key: "collisionO",
+        value: function collisionO(bullet, i) {
+            console.log('test');
+            if (bullet && this.obstacleController.obstacles[i]) {
+                if (bullet.y < this.obstacleController.obstacles[i].y) return false;
+                if (bullet.x >= this.obstacleController.obstacles[i].x || bullet.x <= this.obstacleController.obstacles[i].obstacleW) {
+                    return true;
+                }
+            }
         }
     }, {
         key: "remove",
@@ -638,12 +656,6 @@ var Obstacle = function () {
         key: "render",
         value: function render(ctx) {
             this.draw(ctx, this.x, this.y);
-
-            if (this.type == 1) {
-                // this.x -= 1;
-            } else {
-                    // this.moveY();
-                }
             if (this.x > this.charPosX + 700) {
                 this.controller.remove(this);
             }
@@ -810,8 +822,7 @@ var Player = function () {
                         alert("¡Ganaste!");
                         return;
                     }
-                    if (_this.posX >= 320) _this.cam.follow("right");
-                    _this.moveFw();
+                    if (_this.posX >= 320) _this.moveFw();
                     break;
             }
         };
@@ -827,6 +838,7 @@ var Player = function () {
         this.enemyController = enemyController;
         this.ctx = ctx;
         this.isDead = false;
+        this.canMove = true;
         this.canShoot = true;
         this.posX = 320;
         this.posY = 420;
@@ -904,9 +916,21 @@ var Player = function () {
     }, {
         key: "moveFw",
         value: function moveFw() {
-            this.imgSrc = "../img/hero.png";
-            this.canShoot = true;
-            this.posX += 80;
+            // console.log(this.posX);
+            // console.log(this.obstacleController.obstacles[0].x);
+            // for (var i = 0; this.obstacleController.obstacles; i++) {
+            //     if (((this.obstacleController.obstacles[i].x + 300) - (this.posX)) <= 100 ){
+            //         this.canMove = false;
+            //     }else{
+            //         this.canMove = true;
+            //     }
+            // }
+            if (this.canMove) {
+                this.cam.follow("right");
+                this.imgSrc = "../img/hero.png";
+                this.canShoot = true;
+                this.posX += 80;
+            }
         }
     }, {
         key: "draw",
